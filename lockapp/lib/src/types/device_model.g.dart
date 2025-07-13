@@ -8,35 +8,51 @@ part of 'device_model.dart';
 
 DeviceModel _$DeviceModelFromJson(Map<String, dynamic> json) => DeviceModel(
   id: json['id'] as String,
-  name: json['name'] as String,
-  type: json['type'] as String,
-  ownerId: json['ownerId'] as String,
-  parentId: json['parentId'] as String?,
-  deviceInfo: json['deviceInfo'] as String,
-  isOnline: json['isOnline'] as bool? ?? false,
-  lastSeen: DateTime.parse(json['lastSeen'] as String),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  userId: json['user_id'] as String,
+  deviceName: json['device_name'] as String,
+  deviceId: json['device_id'] as String,
+  deviceType: $enumDecode(_$DeviceTypeEnumMap, json['device_type']),
+  status: $enumDecode(_$DeviceStatusEnumMap, json['status']),
+  osVersion: json['os_version'] as String?,
+  appVersion: json['app_version'] as String?,
+  deviceModel: json['device_model'] as String?,
+  isOnline: json['is_online'] as bool? ?? false,
+  lastSeen: _timestampFromJson(json['last_seen']),
+  fcmToken: json['fcm_token'] as String?,
   settings: json['settings'] as Map<String, dynamic>?,
-  installedApps:
-      (json['installedApps'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
+  metadata: json['metadata'] as Map<String, dynamic>?,
+  createdAt: _timestampFromJson(json['created_at']),
+  updatedAt: _timestampFromJson(json['updated_at']),
 );
 
 Map<String, dynamic> _$DeviceModelToJson(DeviceModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'name': instance.name,
-      'type': instance.type,
-      'ownerId': instance.ownerId,
-      'parentId': instance.parentId,
-      'deviceInfo': instance.deviceInfo,
-      'isOnline': instance.isOnline,
-      'lastSeen': instance.lastSeen.toIso8601String(),
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'user_id': instance.userId,
+      'device_name': instance.deviceName,
+      'device_id': instance.deviceId,
+      'device_type': _$DeviceTypeEnumMap[instance.deviceType]!,
+      'status': _$DeviceStatusEnumMap[instance.status]!,
+      'os_version': instance.osVersion,
+      'app_version': instance.appVersion,
+      'device_model': instance.deviceModel,
+      'is_online': instance.isOnline,
+      'last_seen': _timestampToJson(instance.lastSeen),
+      'fcm_token': instance.fcmToken,
       'settings': instance.settings,
-      'installedApps': instance.installedApps,
+      'metadata': instance.metadata,
+      'created_at': _timestampToJson(instance.createdAt),
+      'updated_at': _timestampToJson(instance.updatedAt),
     };
+
+const _$DeviceTypeEnumMap = {
+  DeviceType.parentDevice: 'parent_device',
+  DeviceType.childDevice: 'child_device',
+};
+
+const _$DeviceStatusEnumMap = {
+  DeviceStatus.active: 'active',
+  DeviceStatus.inactive: 'inactive',
+  DeviceStatus.blocked: 'blocked',
+  DeviceStatus.pending: 'pending',
+};

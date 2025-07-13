@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../theme/app_spacing.dart';
 import '../../navigation/app_router.dart';
+import '../../store/auth/auth_providers.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,26 +30,55 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
+      final authNotifier = ref.read(authNotifierProvider.notifier);
+      
+      final success = await authNotifier.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-      // TODO: Implement actual login logic
-      await Future.delayed(const Duration(seconds: 2));
-
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+      if (mounted && success) {
+        final authState = ref.read(authNotifierProvider);
         
-        // TODO: Navigate based on user role
-        AppRouter.goToParentDashboard();
+        // Navigate based on user role
+        if (authState.isParent) {
+          AppRouter.goToParentDashboard();
+        } else if (authState.isChild) {
+          AppRouter.goToChildDashboard();
+        }
       }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    
+    // Listen to auth errors
+    ref.listen(authErrorProvider, (previous, next) {
+      if (next != null) {
+        _showErrorSnackBar(next);
+        // Clear error after showing
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            ref.read(authNotifierProvider.notifier).clearError();
+          }
+        });
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -112,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  enabled: !authState.isLoading,
                   decoration: const InputDecoration(
                     labelText: 'E-posta',
                     hintText: 'ornek@email.com',
@@ -135,6 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
+                  enabled: !authState.isLoading,
                   decoration: InputDecoration(
                     labelText: 'Şifre',
                     hintText: 'Şifrenizi girin',
@@ -169,8 +201,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
-                    child: _isLoading
+                    onPressed: authState.isLoading ? null : _handleLogin,
+                    child: authState.isLoading
                         ? const SizedBox(
                             width: 20,
                             height: 20,
@@ -189,13 +221,79 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 // Register Link
                 TextButton(
-                  onPressed: () => AppRouter.goToRegister(),
+                  onPressed: authState.isLoading ? null : () => AppRouter.goToRegister(),
                   child: const Text('Hesabınız yok mu? Kayıt olun'),
+                ),
+                
+                SizedBox(height: AppSpacing.md),
+                
+                // Forgot Password Link
+                TextButton(
+                  onPressed: authState.isLoading ? null : () => _showForgotPasswordDialog(),
+                  child: const Text('Şifremi unuttum'),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Şifre Sıfırlama'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.'),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'E-posta',
+                hintText: 'ornek@email.com',
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (emailController.text.trim().isNotEmpty) {
+                Navigator.of(context).pop();
+                
+                final authNotifier = ref.read(authNotifierProvider.notifier);
+                final success = await authNotifier.resetPassword(
+                  email: emailController.text.trim(),
+                );
+                
+                if (mounted) {
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Şifre sıfırlama e-postası gönderildi'),
+                        backgroundColor: AppColors.success,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
+              }
+            },
+            child: const Text('Gönder'),
+          ),
+        ],
       ),
     );
   }

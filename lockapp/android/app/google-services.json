@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "419319549947",
+    "project_id": "lockapp-c41a6",
+    "storage_bucket": "lockapp-c41a6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419319549947:android:f8c86c3e73b4bd595f455e",
+        "android_client_info": {
+          "package_name": "com.lockapp.lockapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWf4i70Sbi-NPZC8Ea-99IyZZTTtXs9vo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

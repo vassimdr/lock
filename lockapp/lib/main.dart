@@ -6,17 +6,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'src/theme/app_theme.dart';
 import 'src/constants/app_constants.dart';
 import 'src/navigation/app_router.dart';
-import 'src/api/supabase_client.dart';
+import 'src/config/firebase_config.dart';
+import 'src/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Supabase
+  // Initialize Firebase services
   try {
-    await SupabaseClientProvider.initialize();
+    await FirebaseConfig.initialize();
+    await NotificationService.initialize();
+    print('✅ Firebase services initialized successfully');
   } catch (e) {
-    print('⚠️  Supabase initialization failed: $e');
-    print('💡 Please update SupabaseConfig with your project credentials');
+    print('⚠️  Firebase initialization failed: $e');
+    print('💡 Please check Firebase configuration');
   }
   
   // Set preferred orientations
