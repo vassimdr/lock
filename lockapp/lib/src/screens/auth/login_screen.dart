@@ -7,9 +7,12 @@ import '../../theme/app_text_styles.dart';
 import '../../theme/app_spacing.dart';
 import '../../navigation/app_router.dart';
 import '../../store/auth/auth_providers.dart';
+import '../../types/enums/user_role.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  final String role;
+  
+  const LoginScreen({super.key, required this.role});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -32,9 +35,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       final authNotifier = ref.read(authNotifierProvider.notifier);
       
+      // Convert string role to UserRole enum
+      final userRole = widget.role == 'parent' ? UserRole.parent : UserRole.child;
+      
       final success = await authNotifier.login(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+        expectedRole: userRole,
       );
 
       if (mounted && success) {
@@ -221,7 +228,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 
                 // Register Link
                 TextButton(
-                  onPressed: authState.isLoading ? null : () => AppRouter.goToRegister(),
+                  onPressed: authState.isLoading ? null : () => AppRouter.goToRegister(role: widget.role),
                   child: const Text('Hesabınız yok mu? Kayıt olun'),
                 ),
                 

@@ -20,7 +20,7 @@ class AppRoutes {
   static const String deviceList = '/device-list';
   static const String deviceDetails = '/device-details';
   static const String devicePairing = '/device-pairing';
-  static const String qrScanner = '/qr-scanner';
+  static const String qrGeneration = '/qr-generation';
   static const String usageStats = '/usage-stats';
   static const String appLocking = '/app-locking';
   static const String parentSettings = '/parent-settings';
@@ -28,6 +28,7 @@ class AppRoutes {
 
   // Child App Routes
   static const String childDashboard = '/child-dashboard';
+  static const String qrScanner = '/qr-scanner';
   static const String childSettings = '/child-settings';
   static const String childProfile = '/child-profile';
   static const String lockScreen = '/lock-screen';
@@ -58,6 +59,7 @@ class AppRoutes {
   static const String deviceListRouteName = 'device-list';
   static const String deviceDetailsRouteName = 'device-details';
   static const String devicePairingRouteName = 'device-pairing';
+  static const String qrGenerationRouteName = 'qr-generation';
   static const String qrScannerRouteName = 'qr-scanner';
   static const String usageStatsRouteName = 'usage-stats';
   static const String appLockingRouteName = 'app-locking';
@@ -101,7 +103,7 @@ class AppRoutes {
     deviceList,
     deviceDetails,
     devicePairing,
-    qrScanner,
+    qrGeneration,
     usageStats,
     appLocking,
     parentSettings,
@@ -110,6 +112,7 @@ class AppRoutes {
 
   static const List<String> childRoutes = [
     childDashboard,
+    qrScanner,
     childSettings,
     childProfile,
     lockScreen,

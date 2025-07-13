@@ -58,7 +58,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 description: 'Çocuğunuzun cihazını kontrol edin ve yönetin',
                 icon: Icons.supervisor_account,
                 color: AppColors.parentPrimary,
-                onTap: () => AppRouter.goToLogin(),
+                onTap: () => AppRouter.goToLogin(role: 'parent'),
               ),
               
               SizedBox(height: AppSpacing.md),
@@ -69,7 +69,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 description: 'Ebeveyn kontrolü altında güvenli kullanım',
                 icon: Icons.child_care,
                 color: AppColors.childPrimary,
-                onTap: () => AppRouter.goToLogin(),
+                onTap: () => AppRouter.goToQrScanner(),
               ),
             ],
           ),

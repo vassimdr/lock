@@ -77,6 +77,18 @@ class ParentDashboardScreen extends StatelessWidget {
               
               // Feature Cards
               _FeatureCard(
+                title: 'Çocuk Cihazı Eşleştir',
+                description: 'QR kod ile çocuk cihazını eşleştirin',
+                icon: Icons.qr_code_2,
+                color: AppColors.parentPrimary,
+                onTap: () {
+                  AppRouter.goToQrGeneration();
+                },
+              ),
+              
+              SizedBox(height: AppSpacing.md),
+              
+              _FeatureCard(
                 title: 'İzinleri Kontrol Et',
                 description: 'Gerekli izinleri kontrol edin ve yönetin',
                 icon: Icons.security,

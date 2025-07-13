@@ -10,7 +10,9 @@ import '../../store/auth/auth_providers.dart';
 import '../../types/enums/user_role.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  final String role;
+  
+  const RegisterScreen({super.key, required this.role});
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -24,8 +26,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
-  UserRole _selectedRole = UserRole.parent;
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -39,11 +39,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       final authNotifier = ref.read(authNotifierProvider.notifier);
       
+      // Convert string role to UserRole enum
+      final userRole = widget.role == 'parent' ? UserRole.parent : UserRole.child;
+      
       final success = await authNotifier.register(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         name: _nameController.text.trim(),
-        role: _selectedRole,
+        role: userRole,
       );
 
       if (mounted && success) {
@@ -195,35 +198,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 
                 SizedBox(height: AppSpacing.md),
                 
-                // Role Selection
+                // Role Info
                 Container(
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.greyLight),
+                    color: AppColors.primaryLight.withOpacity(0.1),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          'Hesap Türü',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
+                      Icon(
+                        widget.role == 'parent' ? Icons.supervisor_account : Icons.child_care,
+                        color: AppColors.primary,
                       ),
-                      ...UserRole.values.map((role) => RadioListTile<UserRole>(
-                        title: Text(role.displayName),
-                        subtitle: Text(role.description),
-                        value: role,
-                        groupValue: _selectedRole,
-                        onChanged: authState.isLoading ? null : (value) {
-                          setState(() {
-                            _selectedRole = value!;
-                          });
-                        },
-                      )),
+                      SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hesap Türü',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            widget.role == 'parent' ? 'Ebeveyn Hesabı' : 'Çocuk Hesabı',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -324,7 +331,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 
                 // Login Link
                 TextButton(
-                  onPressed: authState.isLoading ? null : () => AppRouter.goToLogin(),
+                  onPressed: authState.isLoading ? null : () => AppRouter.goToLogin(role: widget.role),
                   child: const Text('Zaten hesabınız var mı? Giriş yapın'),
                 ),
                 

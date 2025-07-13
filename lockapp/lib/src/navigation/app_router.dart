@@ -7,7 +7,9 @@ import '../screens/auth/register_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/onboarding/role_selection_screen.dart';
 import '../screens/parent/parent_dashboard_screen.dart';
+import '../screens/parent/qr_generation_screen.dart';
 import '../screens/child/child_dashboard_screen.dart';
+import '../screens/child/qr_scanner_screen.dart';
 import '../screens/permissions/permission_screen.dart';
 import '../screens/common/error_screen.dart';
 
@@ -34,15 +36,21 @@ class AppRouter {
       
       // Authentication Routes
       GoRoute(
-        path: AppRoutes.login,
+        path: '${AppRoutes.login}/:role',
         name: AppRoutes.loginRouteName,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) {
+          final role = state.pathParameters['role'] ?? 'parent';
+          return LoginScreen(role: role);
+        },
       ),
       
       GoRoute(
-        path: AppRoutes.register,
+        path: '${AppRoutes.register}/:role',
         name: AppRoutes.registerRouteName,
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) {
+          final role = state.pathParameters['role'] ?? 'parent';
+          return RegisterScreen(role: role);
+        },
       ),
       
       // Onboarding Routes
@@ -65,11 +73,25 @@ class AppRouter {
         builder: (context, state) => const ParentDashboardScreen(),
       ),
       
+      // QR Generation Route (Parent)
+      GoRoute(
+        path: AppRoutes.qrGeneration,
+        name: AppRoutes.qrGenerationRouteName,
+        builder: (context, state) => const QrGenerationScreen(),
+      ),
+      
       // Child Routes
       GoRoute(
         path: AppRoutes.childDashboard,
         name: AppRoutes.childDashboardRouteName,
         builder: (context, state) => const ChildDashboardScreen(),
+      ),
+      
+      // QR Scanner Route (Child)
+      GoRoute(
+        path: AppRoutes.qrScanner,
+        name: AppRoutes.qrScannerRouteName,
+        builder: (context, state) => const QrScannerScreen(),
       ),
       
       // Permission Routes
@@ -114,12 +136,12 @@ class AppRouter {
   );
   
   // Navigation helper methods
-  static void goToLogin() {
-    router.goNamed(AppRoutes.loginRouteName);
+  static void goToLogin({String role = 'parent'}) {
+    router.go('${AppRoutes.login}/$role');
   }
   
-  static void goToRegister() {
-    router.goNamed(AppRoutes.registerRouteName);
+  static void goToRegister({String role = 'parent'}) {
+    router.go('${AppRoutes.register}/$role');
   }
   
   static void goToOnboarding() {
@@ -134,8 +156,16 @@ class AppRouter {
     router.goNamed(AppRoutes.parentDashboardRouteName);
   }
   
+  static void goToQrGeneration() {
+    router.goNamed(AppRoutes.qrGenerationRouteName);
+  }
+  
   static void goToChildDashboard() {
     router.goNamed(AppRoutes.childDashboardRouteName);
+  }
+  
+  static void goToQrScanner() {
+    router.goNamed(AppRoutes.qrScannerRouteName);
   }
   
   static void goToPermissions() {

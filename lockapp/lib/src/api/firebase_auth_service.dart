@@ -13,6 +13,7 @@ class FirebaseAuthService implements AuthService {
   Future<UserModel?> login({
     required String email,
     required String password,
+    required UserRole expectedRole,
   }) async {
     try {
       final credential = await _auth.signInWithEmailAndPassword(
@@ -30,25 +31,24 @@ class FirebaseAuthService implements AuthService {
         if (userDoc.exists) {
           final userData = userDoc.data()!;
           userData['id'] = credential.user!.uid;
-          return UserModel.fromJson(userData);
+          final user = UserModel.fromJson(userData);
+          
+          // Check if user role matches expected role
+          if (user.role != expectedRole) {
+            // Sign out the user since role doesn't match
+            await _auth.signOut();
+            throw error_handler.AuthException(
+              'Access denied. This account is registered as ${user.role.name}. Please use the correct login section.'
+            );
+          }
+          
+          return user;
         } else {
-          // Create user profile if doesn't exist
-          final newUser = UserModel(
-            id: credential.user!.uid,
-            email: credential.user!.email ?? email,
-            name: credential.user!.displayName ?? 'User',
-            role: UserRole.parent, // Default role
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-            isActive: true,
+          // If user document doesn't exist, sign out and throw error
+          await _auth.signOut();
+          throw error_handler.AuthException(
+            'User profile not found. Please register first.'
           );
-
-          await _firestore
-              .collection('users')
-              .doc(credential.user!.uid)
-              .set(newUser.toJson());
-
-          return newUser;
         }
       }
 
@@ -68,6 +68,18 @@ class FirebaseAuthService implements AuthService {
     required UserRole role,
   }) async {
     try {
+      // Check if email already exists with any role
+      final existingUsers = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (existingUsers.docs.isNotEmpty) {
+        throw error_handler.AuthException(
+          'This email is already registered. Please use a different email address.'
+        );
+      }
+
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,

@@ -19,6 +19,8 @@ class UserModel {
   final DateTime updatedAt;
   @JsonKey(name: 'is_active')
   final bool isActive;
+  @JsonKey(name: 'parent_user_id')
+  final String? parentUserId;
   final Map<String, dynamic>? metadata;
 
   static UserRole _roleFromJson(String role) => UserRole.fromString(role);
@@ -33,6 +35,7 @@ class UserModel {
     required this.createdAt,
     required this.updatedAt,
     this.isActive = true,
+    this.parentUserId,
     this.metadata,
   });
 

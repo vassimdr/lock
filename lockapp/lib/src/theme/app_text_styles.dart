@@ -48,6 +48,14 @@ class AppTextStyles {
         height: 1.3,
       );
 
+  // Material Design 3 compatible aliases
+  static TextStyle get headlineLarge => headline1;
+  static TextStyle get headlineMedium => headline2;
+  static TextStyle get headlineSmall => headline3;
+  static TextStyle get titleLarge => headline4;
+  static TextStyle get titleMedium => headline5;
+  static TextStyle get titleSmall => headline6;
+
   // Body Styles
   static TextStyle get bodyLarge => GoogleFonts.poppins(
         fontSize: 16,

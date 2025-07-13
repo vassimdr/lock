@@ -15,6 +15,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
   isActive: json['is_active'] as bool? ?? true,
+  parentUserId: json['parent_user_id'] as String?,
   metadata: json['metadata'] as Map<String, dynamic>?,
 );
 
@@ -27,5 +28,6 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'created_at': instance.createdAt.toIso8601String(),
   'updated_at': instance.updatedAt.toIso8601String(),
   'is_active': instance.isActive,
+  'parent_user_id': instance.parentUserId,
   'metadata': instance.metadata,
 };

@@ -51,6 +51,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<bool> login({
     required String email,
     required String password,
+    required UserRole expectedRole,
   }) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
@@ -58,6 +59,7 @@ class AuthNotifier extends _$AuthNotifier {
       final user = await _authService.login(
         email: email,
         password: password,
+        expectedRole: expectedRole,
       );
       
       if (user != null) {

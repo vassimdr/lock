@@ -7,6 +7,7 @@ abstract class AuthService {
   Future<UserModel?> login({
     required String email,
     required String password,
+    required UserRole expectedRole,
   });
   
   /// Register new user
