@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LockApp</string>
+    <string name="accessibility_service_description">LockApp Ebeveyn Kontrol Servisi - Çocukların dijital güvenliği için uygulamaları kontrol eder</string>
+    <string name="device_admin_description">LockApp Cihaz Yöneticisi - Uzaktan cihaz kilitleme ve yönetim için gereklidir</string>
+</resources> 
