@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:firebase_core/firebase_core.dart';
 
 import 'src/theme/app_theme.dart';
 import 'src/constants/app_constants.dart';
 import 'src/navigation/app_router.dart';
+import 'src/api/supabase_client.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  // await Firebase.initializeApp();
+  // Initialize Supabase
+  try {
+    await SupabaseClientProvider.initialize();
+  } catch (e) {
+    print('⚠️  Supabase initialization failed: $e');
+    print('💡 Please update SupabaseConfig with your project credentials');
+  }
   
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([

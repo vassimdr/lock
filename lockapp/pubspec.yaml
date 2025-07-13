@@ -34,11 +34,8 @@ dependencies:
   # UI Icons
   cupertino_icons: ^1.0.8
 
-  # Firebase (temporarily disabled)
-  # firebase_core: ^3.8.0
-  # firebase_auth: ^5.3.3
-  # cloud_firestore: ^5.5.0
-  # firebase_messaging: ^15.1.5
+  # Supabase (Database & Auth)
+  supabase_flutter: ^2.8.0
 
   # State Management
   flutter_riverpod: ^2.6.1
