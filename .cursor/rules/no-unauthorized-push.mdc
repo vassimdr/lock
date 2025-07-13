@@ -1,0 +1,55 @@
+---
+alwaysApply: true
+description: Git push authorization and security rule
+---
+
+# Git Push Authorization Rule
+
+## 🚫 İZİNSİZ PUSH YAPMA! / NO UNAUTHORIZED PUSH!
+
+### Türkçe Uyarı:
+- Bu proje **LockApp** Flutter ebeveyn kontrol uygulamasıdır
+- Repository'ye push yapmadan önce **MUTLAKA VASİM'DEN** yetkilendirme alınmalıdır
+- Ana branch'e direkt push **KESİNLİKLE YASAKTIR**
+- **SADECE VASİM PUSH YAPABİLİR**
+- Tüm değişiklikler pull request ile yapılmalıdır
+
+### English Warning:
+- This project is **LockApp** Flutter parental control application
+- **AUTHORIZATION FROM VASIM REQUIRED** before pushing to repository
+- Direct push to main branch is **STRICTLY FORBIDDEN**
+- **ONLY VASIM CAN PUSH TO REPOSITORY**
+- All changes must be made through pull requests
+
+### Güvenlik Kuralları / Security Rules:
+
+1. **Branch Protection**: 
+   - Main branch korunmalı / Main branch must be protected
+   - Feature branch'lerde çalışın / Work on feature branches
+
+2. **Code Review**:
+   - Tüm kod değişiklikleri review edilmeli / All code changes must be reviewed
+   - En az 1 approver gerekli / Minimum 1 approver required
+
+3. **Sensitive Information**:
+   - API keys, passwords, tokens commit etmeyin / Don't commit API keys, passwords, tokens
+   - [.gitignore](mdc:.gitignore) dosyasını kontrol edin / Check .gitignore file
+
+4. **Firebase Configuration**:
+   - Firebase config dosyaları hassas bilgi içerir / Firebase config files contain sensitive information
+   - Production keys asla commit edilmemeli / Production keys should never be committed
+
+### Authorized Push Checklist (ONLY FOR VASIM):
+- [ ] Vasim tarafından yetkilendirildi mi? / Authorized by Vasim?
+- [ ] Code review tamamlandı mı? / Code review completed?
+- [ ] Tests geçiyor mu? / Tests passing?
+- [ ] Sensitive data kontrol edildi mi? / Sensitive data checked?
+- [ ] Feature branch kullanıldı mı? / Feature branch used?
+
+### Authorized Developer:
+**SADECE VASİM PUSH YAPABİLİR / ONLY VASIM CAN PUSH**
+
+### Emergency Contact:
+Acil durumlarda Vasim ile iletişime geçin / Contact Vasim in emergencies
+
+**⚠️ BU KURALI İHLAL ETMEYİN! / DO NOT VIOLATE THIS RULE! ⚠️**

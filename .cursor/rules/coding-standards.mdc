@@ -1,0 +1,407 @@
+# 💻 LockApp Kodlama Standartları
+
+## **🎯 Temel Prensipler**
+1. **Clean Code:** Kod okunabilir ve anlaşılır olmalı
+2. **Strict Typing:** `any` kullanımı yasak, tam type safety
+3. **Descriptive Naming:** Değişken ve fonksiyon isimleri açıklayıcı
+4. **Single Responsibility:** Her class/method tek sorumluluk
+
+## **📝 Dart/Flutter Kodlama Kuralları**
+
+### **🔤 Naming Conventions**
+
+```dart
+// ✅ DOĞRU
+class UserAuthService {}
+class DeviceModel {}
+enum UserRole { parent, child }
+
+// ❌ YANLIŞ
+class userservice {}
+class device {}
+enum role { PARENT, CHILD }
+```
+
+### **📦 Import Statements**
+
+```dart
+// ✅ DOĞRU - Sıralama
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:lockapp/src/api/auth_service.dart';
+import 'package:lockapp/src/types/user_model.dart';
+
+// ❌ YANLIŞ - Relative imports
+import '../../api/auth_service.dart';
+import '../../../types/user_model.dart';
+```
+
+### **🎨 Widget Structure**
+
+```dart
+// ✅ DOĞRU Widget Yapısı
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Login')),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            _buildEmailField(),
+            _buildPasswordField(),
+            _buildLoginButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmailField() {
+    return TextFormField(
+      controller: _emailController,
+      decoration: const InputDecoration(labelText: 'Email'),
+      validator: (value) => value?.isEmpty ?? true ? 'Email required' : null,
+    );
+  }
+}
+```
+
+### **🔒 State Management (Riverpod)**
+
+```dart
+// ✅ DOĞRU Provider Yapısı
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  @override
+  AsyncValue<User?> build() {
+    return const AsyncValue.loading();
+  }
+
+  Future<void> login(String email, String password) async {
+    state = const AsyncValue.loading();
+    
+    try {
+      final user = await ref.read(authServiceProvider).login(email, password);
+      state = AsyncValue.data(user);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+}
+
+// Provider kullanımı
+class LoginScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    
+    return authState.when(
+      data: (user) => user != null ? DashboardScreen() : LoginForm(),
+      loading: () => const CircularProgressIndicator(),
+      error: (error, stack) => ErrorWidget(error.toString()),
+    );
+  }
+}
+```
+
+### **🌐 API Service Pattern**
+
+```dart
+// ✅ DOĞRU API Service
+abstract class AuthService {
+  Future<User> login(String email, String password);
+  Future<User> register(String email, String password, String name);
+  Future<void> logout();
+}
+
+class SupabaseAuthService implements AuthService {
+  final SupabaseClient _client;
+  
+  SupabaseAuthService(this._client);
+
+  @override
+  Future<User> login(String email, String password) async {
+    try {
+      final response = await _client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      
+      if (response.user == null) {
+        throw AuthException('Login failed');
+      }
+      
+      return User.fromSupabaseUser(response.user!);
+    } catch (e) {
+      throw AuthException('Login failed: ${e.toString()}');
+    }
+  }
+}
+```
+
+### **📊 Model Classes**
+
+```dart
+// ✅ DOĞRU Model Yapısı
+@JsonSerializable()
+class UserModel {
+  final String id;
+  final String email;
+  final String name;
+  final UserRole role;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const UserModel({
+    required this.id,
+    required this.email,
+    required this.name,
+    required this.role,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserModelToJson(this);
+
+  UserModel copyWith({
+    String? id,
+    String? email,
+    String? name,
+    UserRole? role,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      role: role ?? this.role,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is UserModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+}
+```
+
+### **⚠️ Error Handling**
+
+```dart
+// ✅ DOĞRU Error Handling
+class AppException implements Exception {
+  final String message;
+  final String? code;
+  final dynamic originalError;
+
+  AppException(this.message, {this.code, this.originalError});
+
+  @override
+  String toString() => 'AppException: $message';
+}
+
+class AuthException extends AppException {
+  AuthException(String message) : super(message, code: 'AUTH_ERROR');
+}
+
+// Service'de kullanım
+Future<User> login(String email, String password) async {
+  try {
+    // API call
+  } on SupabaseException catch (e) {
+    throw AuthException('Login failed: ${e.message}');
+  } catch (e) {
+    throw AppException('Unexpected error: ${e.toString()}');
+  }
+}
+```
+
+### **🎨 Theme ve Styling**
+
+```dart
+// ✅ DOĞRU Theme Kullanımı
+class PrimaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  const PrimaryButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48.h, // ScreenUtil kullanımı
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(
+                text,
+                style: AppTextStyles.buttonText,
+              ),
+      ),
+    );
+  }
+}
+```
+
+## **🚫 Yasak Kullanımlar**
+
+### **❌ YAPILMAMASI GEREKENLER**
+
+```dart
+// ❌ Dynamic kullanımı
+dynamic user = getUser();
+
+// ❌ Any kullanımı
+Map<String, dynamic> data = {}; // Kabul edilebilir sadece JSON için
+
+// ❌ Relative imports
+import '../../services/auth.dart';
+
+// ❌ Büyük build methods
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Column(
+      children: [
+        // 100+ satır kod...
+      ],
+    ),
+  );
+}
+
+// ❌ Hardcoded values
+Container(
+  width: 200,
+  height: 50,
+  color: Colors.blue,
+);
+
+// ❌ Null safety ignore
+String? name;
+print(name!); // Tehlikeli
+```
+
+### **✅ DOĞRU ALTERNATIFLER**
+
+```dart
+// ✅ Proper typing
+User user = await authService.getUser();
+
+// ✅ Absolute imports
+import 'package:lockapp/src/api/auth_service.dart';
+
+// ✅ Extracted methods
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: _buildBody(),
+  );
+}
+
+Widget _buildBody() {
+  return Column(
+    children: [
+      _buildHeader(),
+      _buildContent(),
+      _buildFooter(),
+    ],
+  );
+}
+
+// ✅ Theme values
+Container(
+  width: 200.w,
+  height: 50.h,
+  color: AppColors.primary,
+);
+
+// ✅ Safe null handling
+String? name;
+if (name != null) {
+  print(name);
+}
+```
+
+## **📋 Code Review Checklist**
+
+### **Before Commit:**
+- [ ] Tüm imports absolute path kullanıyor
+- [ ] Hardcoded values yok
+- [ ] Error handling mevcut
+- [ ] Widget'lar 100 satırdan az
+- [ ] Null safety doğru kullanılmış
+- [ ] Naming conventions takip edilmiş
+- [ ] TODO yorumları minimize edilmiş
+
+### **Performance:**
+- [ ] Unnecessary rebuilds yok
+- [ ] Dispose methods implemented
+- [ ] Image optimization yapılmış
+- [ ] List optimization (ListView.builder)
+
+### **Security:**
+- [ ] Sensitive data hardcoded değil
+- [ ] Input validation mevcut
+- [ ] API errors properly handled
+
+**Bu standartlara uymak zorunludur!** 🚨
+description:
+globs:
+alwaysApply: false
+---

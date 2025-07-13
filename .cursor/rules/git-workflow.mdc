@@ -1,0 +1,59 @@
+# Git Workflow Rules - LockApp
+
+## Branch Strategy
+- **main**: Production-ready code only
+- **develop**: Integration branch for features
+- **feature/***: New features (e.g., `feature/qr-pairing`)
+- **hotfix/***: Critical bug fixes
+- **release/***: Release preparation
+
+## Commit Message Convention
+```
+type(scope): description
+
+Types:
+- feat: New feature
+- fix: Bug fix
+- docs: Documentation
+- style: Code style changes
+- refactor: Code refactoring
+- test: Testing
+- chore: Maintenance
+
+Examples:
+- feat(auth): add parent login screen
+- fix(permissions): resolve Android overlay permission
+- docs(readme): update installation instructions
+```
+
+## Pre-Commit Checklist
+- [ ] Code follows Flutter/Dart conventions
+- [ ] No sensitive data (API keys, passwords)
+- [ ] Tests passing (`flutter test`)
+- [ ] No linter errors (`flutter analyze`)
+- [ ] Build successful (`flutter build apk --debug`)
+
+## Files to Never Commit
+- `android/app/google-services.json` (Firebase config)
+- `ios/Runner/GoogleService-Info.plist` (Firebase config)
+- `.env` files with API keys
+- `*.keystore` files
+- Personal IDE configurations
+
+## Required Reviews
+- **All PRs**: Minimum 1 approval required
+- **Main branch**: Protected, no direct pushes
+- **Critical features**: 2+ approvals required
+
+## Flutter-Specific Git Rules
+- Commit `pubspec.lock` for dependency consistency
+- Include `android/` and `ios/` directories
+- Exclude `build/` and `.dart_tool/` directories
+- Check [.gitignore](mdc:.gitignore) for Flutter-specific exclusions
+
+## Emergency Procedures
+- Hotfixes: Create `hotfix/*` branch from main
+- Rollback: Use `git revert` instead of `git reset`
+- Critical issues: Contact project maintainer immediately
+
+**Remember: İzinsiz push yapma! / No unauthorized push!**

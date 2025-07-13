@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - users can read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to query users by email (for registration check)
+    match /users/{document=**} {
+      allow read: if request.auth != null && 
+                     request.query.limit <= 1 && 
+                     'email' in request.query.where;
+    }
+    
+    // Devices collection - users can read/write their own devices
+    match /devices/{deviceId} {
+      allow read, write: if request.auth != null && 
+                            request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null && 
+                       request.auth.uid == request.resource.data.user_id;
+    }
+    
+    // Device pairings collection
+    match /device_pairings/{pairingId} {
+      allow read, write: if request.auth != null && 
+                            (request.auth.uid == resource.data.parent_user_id ||
+                             request.auth.uid == resource.data.child_user_id);
+      allow create: if request.auth != null && 
+                       (request.auth.uid == request.resource.data.parent_user_id ||
+                        request.auth.uid == request.resource.data.child_user_id);
+    }
+    
+    // App list collection
+    match /app_list/{appId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Lock commands collection
+    match /lock_commands/{commandId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Usage stats collection
+    match /usage_stats/{statId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+} 

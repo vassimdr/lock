@@ -1,0 +1,203 @@
+# 📁 LockApp Klasör Yapısı Kuralları
+
+## **🎯 Temel Prensip: Separation of Concerns**
+Her dosya belirlenen klasörde bulunmalı ve amacına uygun konumlandırılmalıdır.
+
+## **📂 Zorunlu Klasör Yapısı**
+
+```
+lib/src/
+├── api/             # API clients ve calls (Supabase, HTTP)
+├── assets/          # Images, fonts, animations
+├── components/      # Reusable, pure UI components
+├── config/          # Environment variables ve configuration
+├── constants/       # App-wide constants (route names, etc.)
+├── hooks/           # Custom React hooks (if needed)
+├── navigation/      # React Navigation logic ve routers
+├── screens/         # Screen components (Her screen kendi klasörü)
+├── store/           # Riverpod state management
+├── theme/           # Styling ve theme (colors, fonts, spacing)
+├── types/           # Global TypeScript types
+└── utils/           # Helper functions (formatDate, validators, etc.)
+```
+
+## **🔒 Klasör Kuralları**
+
+### **📱 /screens/ Klasörü**
+```
+screens/
+├── auth/
+│   ├── login_screen.dart
+│   ├── register_screen.dart
+│   └── forgot_password_screen.dart
+├── parent/
+│   ├── parent_dashboard_screen.dart
+│   ├── device_list_screen.dart
+│   └── usage_stats_screen.dart
+├── child/
+│   ├── child_dashboard_screen.dart
+│   └── lock_screen.dart
+├── common/
+│   ├── error_screen.dart
+│   └── loading_screen.dart
+└── onboarding/
+    ├── onboarding_screen.dart
+    └── role_selection_screen.dart
+```
+
+### **🏪 /store/ Klasörü (Riverpod)**
+```
+store/
+├── auth/
+│   ├── auth_provider.dart
+│   ├── auth_state.dart
+│   └── auth_notifier.dart
+├── device/
+│   ├── device_provider.dart
+│   ├── device_state.dart
+│   └── device_notifier.dart
+├── app_lock/
+│   ├── app_lock_provider.dart
+│   └── app_lock_state.dart
+└── global/
+    ├── app_state_provider.dart
+    └── navigation_provider.dart
+```
+
+### **🌐 /api/ Klasörü**
+```
+api/
+├── supabase_client.dart      # Supabase client setup
+├── auth_service.dart         # Authentication API calls
+├── device_service.dart       # Device management API
+├── usage_service.dart        # Usage statistics API
+├── lock_service.dart         # App locking API
+└── models/
+    ├── api_response.dart
+    ├── api_error.dart
+    └── request_models.dart
+```
+
+### **🎨 /components/ Klasörü**
+```
+components/
+├── buttons/
+│   ├── primary_button.dart
+│   ├── secondary_button.dart
+│   └── icon_button.dart
+├── cards/
+│   ├── device_card.dart
+│   ├── app_card.dart
+│   └── feature_card.dart
+├── forms/
+│   ├── custom_text_field.dart
+│   ├── password_field.dart
+│   └── form_validators.dart
+├── dialogs/
+│   ├── confirmation_dialog.dart
+│   ├── error_dialog.dart
+│   └── loading_dialog.dart
+└── common/
+    ├── loading_indicator.dart
+    ├── empty_state.dart
+    └── error_widget.dart
+```
+
+### **🎯 /types/ Klasörü**
+```
+types/
+├── user_model.dart
+├── user_model.g.dart
+├── device_model.dart
+├── device_model.g.dart
+├── app_model.dart
+├── usage_stats_model.dart
+├── enums/
+│   ├── user_role.dart
+│   ├── device_status.dart
+│   └── app_status.dart
+└── interfaces/
+    ├── api_service.dart
+    └── storage_service.dart
+```
+
+## **⚠️ Klasör Kuralları**
+
+### **✅ YAPILMASI GEREKENLER**
+1. **Absolute Imports:** `import 'package:lockapp/src/components/buttons/primary_button.dart';`
+2. **Dosya Adlandırma:** `snake_case` kullanın
+3. **Klasör Adlandırma:** `lowercase` kullanın
+4. **Tek Sorumluluk:** Her dosya tek bir class/widget içermeli
+5. **Barrel Exports:** Her klasörde `index.dart` oluşturun
+
+### **❌ YAPILMAMASI GEREKENLER**
+1. **Relative Imports:** `import '../../components/button.dart'` YASAK
+2. **Karışık Klasörler:** Screen içinde service kodu YASAK
+3. **Büyük Dosyalar:** 500+ satır dosyalar bölünmeli
+4. **Generic İsimler:** `utils.dart`, `helpers.dart` gibi belirsiz isimler
+
+## **📝 Dosya Adlandırma Kuralları**
+
+### **Screen Dosyaları**
+- `login_screen.dart`
+- `parent_dashboard_screen.dart`
+- `device_list_screen.dart`
+
+### **Component Dosyaları**
+- `primary_button.dart`
+- `device_card.dart`
+- `custom_text_field.dart`
+
+### **Service Dosyaları**
+- `auth_service.dart`
+- `database_service.dart`
+- `notification_service.dart`
+
+### **Provider Dosyaları**
+- `auth_provider.dart`
+- `device_provider.dart`
+- `app_state_provider.dart`
+
+### **Model Dosyaları**
+- `user_model.dart`
+- `device_model.dart`
+- `api_response.dart`
+
+## **🔄 Barrel Exports Örneği**
+
+```dart
+// lib/src/components/index.dart
+export 'buttons/primary_button.dart';
+export 'buttons/secondary_button.dart';
+export 'cards/device_card.dart';
+export 'forms/custom_text_field.dart';
+
+// Usage:
+import 'package:lockapp/src/components/index.dart';
+```
+
+## **🎯 Faz Bazlı Dosya Oluşturma**
+
+### **Faz 1: Temel Altyapı**
+```
+lib/src/
+├── api/supabase_client.dart
+├── store/app_state_provider.dart
+├── utils/error_handler.dart
+└── config/app_config.dart
+```
+
+### **Faz 2: Authentication**
+```
+lib/src/
+├── api/auth_service.dart
+├── store/auth/auth_provider.dart
+├── screens/auth/login_screen.dart
+└── types/user_model.dart
+```
+
+**Bu yapıyı takip etmek zorunludur!** 🚨
+description:
+globs:
+alwaysApply: false
+---

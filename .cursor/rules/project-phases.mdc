@@ -1,0 +1,137 @@
+# 🗺️ LockApp Geliştirme Fazları ve Kuralları
+
+## **Proje Genel Bilgileri**
+- **Proje Adı:** LockApp - Ebeveyn Kontrol Uygulaması
+- **Platform:** Flutter (Android odaklı)
+- **Database:** Supabase (PostgreSQL)
+- **State Management:** Riverpod
+- **Navigation:** GoRouter
+
+## **📋 7 Fazlı Geliştirme Planı**
+
+### **🏗️ FAZ 1: Temel Altyapı ve Planlama (AKTIF)**
+**Durum:** IN_PROGRESS
+**Hedef:** Sağlam temeller atmak
+
+**Yapılacaklar:**
+- [x] Database seçimi (Supabase seçildi)
+- [ ] Supabase project setup
+- [ ] Database schema tasarımı
+- [ ] Riverpod providers kurulumu
+- [ ] API service layer architecture
+- [ ] Error handling strategy
+
+**Dosya Yapısı:**
+```
+lib/src/
+├── api/
+│   ├── supabase_client.dart
+│   ├── auth_service.dart
+│   └── database_service.dart
+├── store/
+│   ├── auth_provider.dart
+│   ├── device_provider.dart
+│   └── app_state_provider.dart
+└── utils/
+    ├── error_handler.dart
+    └── constants.dart
+```
+
+### **🔐 FAZ 2: Authentication ve User Management**
+**Durum:** PENDING
+**Bağımlılık:** Faz 1 tamamlanmalı
+
+**Yapılacaklar:**
+- [ ] Supabase Auth entegrasyonu
+- [ ] Login/Register screens (gerçek backend)
+- [ ] JWT token management
+- [ ] Session persistence
+- [ ] Role-based navigation
+- [ ] Profile management
+
+### **📱 FAZ 3: Device Pairing**
+**Durum:** PENDING
+**Bağımlılık:** Faz 2 tamamlanmalı
+
+**Yapılacaklar:**
+- [ ] QR Code generation (parent device)
+- [ ] QR Code scanning (child device)
+- [ ] Device registration
+- [ ] Device status tracking
+- [ ] Pairing wizard UI
+
+### **🔒 FAZ 4: App Locking Core**
+**Durum:** PENDING
+**Bağımlılık:** Faz 3 tamamlanmalı
+
+**Yapılacaklar:**
+- [ ] AccessibilityService implementation
+- [ ] DeviceAdmin policies
+- [ ] Installed apps detection
+- [ ] Real-time app blocking
+- [ ] Control panel UI
+
+### **🎨 FAZ 5: UI/UX Geliştirme**
+**Durum:** PENDING
+**Bağımlılık:** Faz 4 tamamlanmalı
+
+**Yapılacaklar:**
+- [ ] Design system refinement
+- [ ] Animations ve transitions
+- [ ] Responsive design
+- [ ] Accessibility features
+- [ ] Component library
+
+### **📊 FAZ 6: Gelişmiş Özellikler**
+**Durum:** PENDING
+**Bağımlılık:** Faz 5 tamamlanmalı
+
+**Yapılacaklar:**
+- [ ] Usage statistics
+- [ ] Push notifications
+- [ ] Time-based restrictions
+- [ ] Charts ve reports
+- [ ] Scheduling system
+
+### **🧪 FAZ 7: Test ve Deployment**
+**Durum:** PENDING
+**Bağımlılık:** Faz 6 tamamlanmalı
+
+**Yapılacaklar:**
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] Performance optimization
+- [ ] Play Store preparation
+- [ ] Documentation
+
+## **⚠️ Faz Geçiş Kuralları**
+
+1. **Bir fazdan diğerine geçmek için:**
+   - Mevcut fazın tüm görevleri tamamlanmalı
+   - Code review yapılmalı
+   - Temel testler yazılmalı
+   - Dokumentasyon güncellenmelidir
+
+2. **Her fazda dikkat edilecekler:**
+   - [Folder structure rules](mdc:folder-structure.mdc) takip edilmeli
+   - [Coding standards](mdc:coding-standards.mdc) uygulanmalı
+   - Git commit messages açıklayıcı olmalı
+   - TODO yorumları minimize edilmeli
+
+3. **Faz tamamlama kriterleri:**
+   - Emulator'da çalışan demo hazır
+   - Kritik bug'lar çözülmüş
+   - Performance kabul edilebilir seviyede
+   - UI/UX temel standartlarda
+
+## **🎯 Şu Anki Odak: FAZ 1**
+- Supabase setup
+- Database schema
+- Provider architecture
+- Error handling
+
+**Sonraki adım:** Supabase project oluşturma ve Flutter entegrasyonu
+description:
+globs:
+alwaysApply: false
+---

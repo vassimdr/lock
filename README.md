@@ -1,145 +1,211 @@
-# LockApp - Ebeveyn Kontrol Uygulaması
+# LockApp - Parental Control Mobile Application
 
-Flutter ile geliştirilmiş kapsamlı ebeveyn kontrol uygulaması. Çocukların dijital alışkanlıklarını yönetmek ve güvenli internet kullanımı sağlamak için tasarlanmıştır.
+## 📱 Overview
 
-## 🚀 Özellikler
+LockApp is a comprehensive parental control mobile application built with Flutter and Firebase. It enables parents to monitor and control their children's device usage, manage app access, and ensure digital safety.
 
-### ✅ Tamamlanan Özellikler
-- **Modern UI/UX**: Material 3 tasarım sistemi
-- **Rol Tabanlı Giriş**: Ebeveyn ve Çocuk rolleri
-- **Kapsamlı İzin Yönetimi**: 
-  - Kullanım erişimi izni
-  - Erişilebilirlik servisi izni
-  - Cihaz yöneticisi izni
-  - Üstte gösterme izni
-- **Otomatik İzin İsteme**: Bazı izinler için otomatik yönlendirme
-- **Native Android Entegrasyonu**: Gerçek izin kontrolleri
-- **Akıllı Fallback Sistemi**: Çoklu alternatif yönlendirme
-- **Responsive Tasarım**: Farklı ekran boyutları desteği
+## ✨ Features
 
-### 🔄 Geliştirme Aşamasında
-- Firebase Authentication entegrasyonu
-- QR kod ile cihaz eşleştirme
-- Uygulama kullanım istatistikleri
-- Uzaktan uygulama kilitleme
-- Gerçek zamanlı bildirimler
+### 🔐 Authentication & User Management
+- **Secure Firebase Authentication** with email/password
+- **Role-based access control** (Parent/Child accounts)
+- **Real-time user session management**
 
-## 🏗️ Mimari
+### 📱 Device Management
+- **Device pairing** between parent and child devices
+- **Real-time device status monitoring**
+- **Device registration and identification**
 
-### Klasör Yapısı
-```
-lib/src/
-├── api/             # API clients ve çağrıları
-├── assets/          # Resimler, fontlar, animasyonlar
-├── components/      # Yeniden kullanılabilir UI bileşenleri
-├── config/          # Çevre değişkenleri ve konfigürasyon
-├── constants/       # Uygulama sabitleri
-├── hooks/           # Custom React hooks
-├── navigation/      # React Navigation mantığı
-├── screens/         # Ekran bileşenleri
-├── store/           # Redux Toolkit state yönetimi
-├── theme/           # Styling ve tema
-├── types/           # Global TypeScript tipleri
-└── utils/           # Yardımcı fonksiyonlar
-```
+### 🎯 App Control
+- **App locking/unlocking** functionality
+- **Installed app detection and management**
+- **Custom app restrictions**
 
-### Teknoloji Stack
-- **Framework**: Flutter 3.32.5
-- **State Management**: Riverpod
-- **Navigation**: Go Router
-- **Styling**: Flutter ScreenUtil + Google Fonts
-- **Database**: Cloud Firestore (gelecek)
-- **Authentication**: Firebase Auth (gelecek)
-- **Native Integration**: MethodChannel
+### 📊 Analytics & Monitoring
+- **Usage statistics** and time tracking
+- **Firebase Analytics** integration
+- **Real-time activity monitoring**
 
-## 📱 İzin Sistemi
+### 🔔 Notifications
+- **Push notifications** via Firebase Cloud Messaging
+- **Real-time alerts** for parents
+- **Status updates** and system notifications
 
-### Gerekli İzinler
-1. **Kullanım Erişimi İzni**: Uygulama kullanım istatistikleri
-2. **Erişilebilirlik Servisi**: Uygulama kontrolü
-3. **Cihaz Yöneticisi**: Uzaktan cihaz yönetimi
-4. **Üstte Gösterme**: Kilit ekranı gösterimi
+### 📈 Additional Features
+- **Crash reporting** with Firebase Crashlytics
+- **Offline support** with Firestore caching
+- **Modern UI/UX** with Material Design 3
+- **Cross-platform** support (Android/iOS)
 
-### Otomatik İzin İsteme
-- Accessibility Service için doğrudan ayar sayfası
-- Device Admin için otomatik yetkilendirme dialogu
-- Akıllı fallback sistemi ile alternatif yollar
+## 🛠️ Tech Stack
 
-## 🛠️ Kurulum
+### Frontend
+- **Flutter** - Cross-platform mobile framework
+- **Dart** - Programming language
+- **Material Design 3** - UI components
 
-### Gereksinimler
-- Flutter SDK 3.8.1+
-- Android SDK 21+
-- Kotlin support
+### Backend & Services
+- **Firebase Core** - Foundation services
+- **Firebase Authentication** - User management
+- **Cloud Firestore** - NoSQL database
+- **Firebase Cloud Messaging** - Push notifications
+- **Firebase Analytics** - Usage tracking
+- **Firebase Crashlytics** - Error reporting
 
-### Adımlar
+### State Management & Architecture
+- **Riverpod** - State management
+- **GoRouter** - Navigation
+- **Freezed** - Immutable data classes
+- **JSON Annotation** - Serialization
+
+### Development Tools
+- **Build Runner** - Code generation
+- **Flutter Lints** - Code quality
+- **Permission Handler** - Device permissions
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Flutter SDK (3.0+)
+- Dart SDK
+- Android Studio / VS Code
+- Firebase account
+
+### Installation
+
+1. **Clone the repository**
 ```bash
-# Repository'yi klonla
 git clone https://github.com/vassimdr/lock.git
 cd lock/lockapp
+   ```
 
-# Bağımlılıkları yükle
+2. **Install dependencies**
+   ```bash
 flutter pub get
+   ```
 
-# Android emülatörde çalıştır
-flutter run -d android
+3. **Run code generation**
+   ```bash
+   flutter pub run build_runner build
+   ```
 
-# Windows'ta çalıştır
-flutter run -d windows
+4. **Firebase Setup**
+   - Create a Firebase project
+   - Add your Android/iOS apps
+   - Download `google-services.json` and place in `android/app/`
+   - Download `GoogleService-Info.plist` and place in `ios/Runner/`
+
+5. **Run the app**
+   ```bash
+   flutter run
+   ```
+
+## 📁 Project Structure
+
+```
+lib/
+├── main.dart                 # App entry point
+└── src/
+    ├── api/                  # Firebase services
+    │   ├── auth_service.dart
+    │   ├── firebase_auth_service.dart
+    │   ├── firestore_service.dart
+    │   ├── notification_service.dart
+    │   └── analytics_service.dart
+    ├── config/               # Configuration files
+    │   └── firebase_config.dart
+    ├── constants/            # App constants
+    │   ├── app_constants.dart
+    │   └── app_routes.dart
+    ├── navigation/           # Navigation logic
+    │   └── app_router.dart
+    ├── screens/              # UI screens
+    │   ├── auth/
+    │   ├── child/
+    │   ├── parent/
+    │   ├── onboarding/
+    │   └── permissions/
+    ├── services/             # Device services
+    │   └── permission_service.dart
+    ├── store/                # State management
+    │   └── auth/
+    ├── theme/                # App theming
+    │   ├── app_colors.dart
+    │   ├── app_text_styles.dart
+    │   └── app_theme.dart
+    ├── types/                # Data models
+    │   ├── user_model.dart
+    │   ├── device_model.dart
+    │   └── enums/
+    └── utils/                # Utility functions
+        └── error_handler.dart
 ```
 
-## 🔧 Geliştirme
+## 🔧 Configuration
 
-### Native Android Entegrasyonu
-- **MainActivity.kt**: MethodChannel ile Flutter-Android köprüsü
-- **LockAppAccessibilityService**: Erişilebilirlik servisi
-- **LockAppDeviceAdminReceiver**: Cihaz yöneticisi receiver
-- **Native İzin Kontrolleri**: Gerçek zamanlı izin durumu
+### Firebase Configuration
+1. Enable Authentication with Email/Password
+2. Create Firestore Database
+3. Enable Analytics
+4. Set up Cloud Messaging
+5. Configure Crashlytics
 
-### Tema Sistemi
-- **AppColors**: Kapsamlı renk paleti
-- **AppTextStyles**: Google Fonts (Poppins) tipografi
-- **AppSpacing**: Tutarlı spacing değerleri
-- **Material 3**: Modern tasarım sistemi
+### Android Configuration
+- Minimum SDK: 23
+- Target SDK: 34
+- Permissions: Internet, Wake Lock, Receive Boot Completed
 
-## 📋 TODO
+## 🎯 Usage
 
-### Yüksek Öncelik
-- [ ] Firebase Authentication entegrasyonu
-- [ ] QR kod ile cihaz eşleştirme
-- [ ] Gerçek uygulama kullanım istatistikleri
-- [ ] Uzaktan uygulama kilitleme
+### For Parents
+1. **Register** as a parent user
+2. **Pair** with child's device
+3. **Monitor** app usage and activity
+4. **Control** app access remotely
+5. **Receive** real-time notifications
 
-### Orta Öncelik
-- [ ] Push notification sistemi
-- [ ] Ebeveyn dashboard geliştirme
-- [ ] Çocuk profil yönetimi
-- [ ] Zaman bazlı kısıtlamalar
+### For Children
+1. **Register** as a child user
+2. **Accept** parent's pairing request
+3. **Use** device within set restrictions
+4. **Request** app access when needed
 
-### Düşük Öncelik
-- [ ] iOS desteği
-- [ ] Web dashboard
-- [ ] Çoklu dil desteği
-- [ ] Dark mode
+## 🔒 Security
 
-## 🤝 Katkıda Bulunma
+- **Firebase Security Rules** for data protection
+- **Role-based access control**
+- **Encrypted data transmission**
+- **Secure authentication flows**
 
-1. Fork yapın
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit yapın (`git commit -m 'Add amazing feature'`)
-4. Push yapın (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
+## 📱 Supported Platforms
 
-## 📄 Lisans
+- ✅ Android (API 23+)
+- ✅ iOS (iOS 12+)
+- 🔄 Web (Planned)
+- 🔄 Desktop (Planned)
 
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+## 🤝 Contributing
 
-## 📞 İletişim
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-Proje Sahibi: [@vassimdr](https://github.com/vassimdr)
+## 📄 License
 
-Proje Linki: [https://github.com/vassimdr/lock](https://github.com/vassimdr/lock)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Vasim** - [GitHub](https://github.com/vassimdr)
+
+## 🙏 Acknowledgments
+
+- Flutter team for the amazing framework
+- Firebase team for the backend services
+- Community contributors and testers
 
 ---
 
-⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın! 
+**Made with ❤️ by Vasim** 

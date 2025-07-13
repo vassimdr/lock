@@ -1,0 +1,370 @@
+# 🏗️ FAZ 1: Supabase Setup ve Implementation
+
+## **🎯 Faz 1 Hedefleri**
+- Supabase project kurulumu
+- Database schema tasarımı
+- Flutter Supabase entegrasyonu
+- Temel API service layer
+- Riverpod state management setup
+
+## **📋 Supabase Database Schema**
+
+### **🗄️ Tables Structure**
+
+```sql
+-- Users table
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('parent', 'child')),
+  profile_image_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT TRUE,
+  metadata JSONB DEFAULT '{}'
+);
+
+-- Devices table
+CREATE TABLE devices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('parent_device', 'child_device')),
+  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  parent_id UUID REFERENCES devices(id) ON DELETE CASCADE,
+  device_info JSONB NOT NULL,
+  is_online BOOLEAN DEFAULT FALSE,
+  last_seen TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  settings JSONB DEFAULT '{}',
+  installed_apps TEXT[] DEFAULT '{}'
+);
+
+-- App List table
+CREATE TABLE app_list (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  device_id UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+  package_name TEXT NOT NULL,
+  app_name TEXT NOT NULL,
+  version TEXT,
+  icon_url TEXT,
+  category TEXT,
+  is_system_app BOOLEAN DEFAULT FALSE,
+  is_locked BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(device_id, package_name)
+);
+
+-- Lock Commands table
+CREATE TABLE lock_commands (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  parent_device_id UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+  child_device_id UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+  app_package_name TEXT NOT NULL,
+  command_type TEXT NOT NULL CHECK (command_type IN ('lock', 'unlock')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'executed', 'failed')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  executed_at TIMESTAMP WITH TIME ZONE,
+  error_message TEXT
+);
+
+-- Usage Stats table
+CREATE TABLE usage_stats (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  device_id UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+  app_package_name TEXT NOT NULL,
+  app_name TEXT NOT NULL,
+  usage_date DATE NOT NULL,
+  total_time_minutes INTEGER DEFAULT 0,
+  open_count INTEGER DEFAULT 0,
+  last_used TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(device_id, app_package_name, usage_date)
+);
+```
+
+### **🔒 Row Level Security (RLS)**
+
+```sql
+-- Enable RLS
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE devices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_list ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lock_commands ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usage_stats ENABLE ROW LEVEL SECURITY;
+
+-- Users policies
+CREATE POLICY "Users can view own profile" ON users
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON users
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Devices policies
+CREATE POLICY "Users can view own devices" ON devices
+  FOR SELECT USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can manage own devices" ON devices
+  FOR ALL USING (auth.uid() = owner_id);
+
+-- App list policies
+CREATE POLICY "Users can view apps on own devices" ON app_list
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM devices 
+      WHERE devices.id = app_list.device_id 
+      AND devices.owner_id = auth.uid()
+    )
+  );
+```
+
+## **🔧 Flutter Supabase Implementation**
+
+### **📦 Dependencies (pubspec.yaml)**
+
+```yaml
+dependencies:
+  supabase_flutter: ^2.8.0
+  
+dev_dependencies:
+  build_runner: ^2.4.13
+  riverpod_generator: ^2.6.2
+```
+
+### **🏗️ File Structure**
+
+```
+lib/src/
+├── api/
+│   ├── supabase_client.dart
+│   ├── auth_service.dart
+│   ├── device_service.dart
+│   ├── app_service.dart
+│   └── models/
+│       ├── api_response.dart
+│       └── api_error.dart
+├── config/
+│   ├── app_config.dart
+│   └── supabase_config.dart
+├── store/
+│   ├── auth/
+│   │   ├── auth_provider.dart
+│   │   └── auth_state.dart
+│   └── global/
+│       └── app_state_provider.dart
+└── utils/
+    ├── error_handler.dart
+    └── logger.dart
+```
+
+### **🔑 Supabase Client Setup**
+
+```dart
+// lib/src/config/supabase_config.dart
+class SupabaseConfig {
+  static const String url = 'YOUR_SUPABASE_URL';
+  static const String anonKey = 'YOUR_SUPABASE_ANON_KEY';
+}
+
+// lib/src/api/supabase_client.dart
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lockapp/src/config/supabase_config.dart';
+
+class SupabaseClientProvider {
+  static SupabaseClient? _instance;
+  
+  static SupabaseClient get instance {
+    _instance ??= Supabase.instance.client;
+    return _instance!;
+  }
+  
+  static Future<void> initialize() async {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.anonKey,
+    );
+  }
+}
+```
+
+### **🔐 Auth Service Implementation**
+
+```dart
+// lib/src/api/auth_service.dart
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lockapp/src/api/supabase_client.dart';
+import 'package:lockapp/src/types/user_model.dart';
+
+abstract class AuthService {
+  Future<UserModel> login(String email, String password);
+  Future<UserModel> register(String email, String password, String name, String role);
+  Future<void> logout();
+  Future<UserModel?> getCurrentUser();
+  Stream<AuthState> get authStateStream;
+}
+
+class SupabaseAuthService implements AuthService {
+  final SupabaseClient _client = SupabaseClientProvider.instance;
+
+  @override
+  Future<UserModel> login(String email, String password) async {
+    try {
+      final response = await _client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.user == null) {
+        throw AuthException('Login failed: No user returned');
+      }
+
+      // Get user profile from users table
+      final userProfile = await _client
+          .from('users')
+          .select()
+          .eq('id', response.user!.id)
+          .single();
+
+      return UserModel.fromJson(userProfile);
+    } on AuthException catch (e) {
+      throw AuthException('Login failed: ${e.message}');
+    } catch (e) {
+      throw AuthException('Login failed: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<UserModel> register(String email, String password, String name, String role) async {
+    try {
+      final response = await _client.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      if (response.user == null) {
+        throw AuthException('Registration failed: No user returned');
+      }
+
+      // Create user profile
+      final userProfile = await _client.from('users').insert({
+        'id': response.user!.id,
+        'email': email,
+        'name': name,
+        'role': role,
+      }).select().single();
+
+      return UserModel.fromJson(userProfile);
+    } on AuthException catch (e) {
+      throw AuthException('Registration failed: ${e.message}');
+    } catch (e) {
+      throw AuthException('Registration failed: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<AuthState> get authStateStream => _client.auth.onAuthStateChange;
+}
+```
+
+### **🏪 Riverpod Providers**
+
+```dart
+// lib/src/store/auth/auth_provider.dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:lockapp/src/api/auth_service.dart';
+import 'package:lockapp/src/types/user_model.dart';
+
+part 'auth_provider.g.dart';
+
+@riverpod
+AuthService authService(AuthServiceRef ref) {
+  return SupabaseAuthService();
+}
+
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  @override
+  AsyncValue<UserModel?> build() {
+    _listenToAuthChanges();
+    return const AsyncValue.loading();
+  }
+
+  void _listenToAuthChanges() {
+    final authService = ref.read(authServiceProvider);
+    authService.authStateStream.listen((authState) {
+      if (authState.event == AuthChangeEvent.signedIn) {
+        _loadCurrentUser();
+      } else if (authState.event == AuthChangeEvent.signedOut) {
+        state = const AsyncValue.data(null);
+      }
+    });
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final user = await ref.read(authServiceProvider).getCurrentUser();
+      state = AsyncValue.data(user);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  Future<void> login(String email, String password) async {
+    state = const AsyncValue.loading();
+    try {
+      final user = await ref.read(authServiceProvider).login(email, password);
+      state = AsyncValue.data(user);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  Future<void> register(String email, String password, String name, String role) async {
+    state = const AsyncValue.loading();
+    try {
+      final user = await ref.read(authServiceProvider).register(email, password, name, role);
+      state = AsyncValue.data(user);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      await ref.read(authServiceProvider).logout();
+      state = const AsyncValue.data(null);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+}
+```
+
+## **⚠️ Faz 1 Tamamlama Kriterleri**
+
+### **✅ Checklist:**
+- [ ] Supabase project oluşturuldu
+- [ ] Database schema implement edildi
+- [ ] RLS policies configured
+- [ ] Flutter Supabase client setup
+- [ ] Auth service implemented
+- [ ] Riverpod providers created
+- [ ] Error handling implemented
+- [ ] Basic login/register flow working
+- [ ] Emulator'da test edildi
+
+### **🧪 Test Scenarios:**
+1. User registration çalışıyor
+2. User login çalışıyor
+3. Auth state changes properly handled
+4. Error handling working
+5. RLS policies protecting data
+
+**Bu faz tamamlandıktan sonra Faz 2'ye geçilebilir!** 🚀
+description:
+globs:
+alwaysApply: false
+---

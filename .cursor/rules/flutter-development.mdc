@@ -1,0 +1,56 @@
+# Flutter Development Rules - LockApp
+
+## Sacred Folder Structure (Separation of Concerns)
+Every file must be located in its designated folder according to its purpose:
+
+```
+lib/src/
+├── api/             # API clients and calls (Supabase, etc.)
+├── assets/          # Images, fonts, animations
+├── components/      # Reusable, pure UI components
+├── config/          # Environment variables and configuration
+├── constants/       # App-wide constants (route names, etc.)
+├── hooks/           # Custom React hooks
+├── navigation/      # React Navigation logic and routers
+├── screens/         # Screen components (Each screen can have its own folder)
+├── store/           # Redux Toolkit state management
+├── theme/           # Styling and theme (colors, fonts, spacing)
+├── types/           # Global TypeScript types
+└── utils/           # Helper functions (formatDate, validators, etc.)
+```
+
+## State Management Rules
+- **Single Source of Truth**: All global application state managed exclusively using **Flutter Riverpod**
+- Context API forbidden for global state
+- Context only for library integrations or component-specific state
+
+## Navigation Rules
+- **Clean Navigation**: [main.dart](mdc:lib/main.dart) must remain clean
+- All navigation logic in [lib/src/navigation/](mdc:lib/src/navigation/) folder
+- Use **Go Router** for navigation management
+
+## Styling Rules
+- **Consistent Styling**: All styling through theme objects in [lib/src/theme/](mdc:lib/src/theme/)
+- Colors, fonts, spacing sourced from theme objects
+- Material 3 design system implementation
+
+## Code Quality Rules
+- **Absolute Imports**: Use absolute paths instead of relative paths
+- **Strict Typing**: Avoid `dynamic` type, aim for full type-safety
+- **Descriptive Naming**: Clear, descriptive names for all identifiers
+
+## Dependencies Rules
+- **Lean Dependencies**: Evaluate before adding new packages
+- Single, well-vetted library for each function
+- Avoid library duplication
+
+## Security Rules for LockApp
+- **Permission Handling**: All Android permissions must be properly declared in [android/app/src/main/AndroidManifest.xml](mdc:android/app/src/main/AndroidManifest.xml)
+- **Native Integration**: Use MethodChannel for Android-specific features
+- **Sensitive Data**: Never commit Firebase config files or API keys
+
+## File References
+- Main entry: [lib/main.dart](mdc:lib/main.dart)
+- Theme configuration: [lib/src/theme/app_theme.dart](mdc:lib/src/theme/app_theme.dart)
+- Navigation setup: [lib/src/navigation/app_router.dart](mdc:lib/src/navigation/app_router.dart)
+- Dependencies: [pubspec.yaml](mdc:pubspec.yaml)
