@@ -106,9 +106,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           padding: EdgeInsets.all(AppSpacing.screenPadding),
           child: Form(
             key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                 // App Logo
                 Container(
                   width: 100.w,
@@ -240,6 +241,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: const Text('Şifremi unuttum'),
                 ),
               ],
+                ),
+              ),
             ),
           ),
         ),

@@ -61,7 +61,14 @@ class AppBlockingService {
   Future<List<Map<String, dynamic>>> getInstalledApps() async {
     try {
       final List<dynamic> apps = await _channel.invokeMethod('getInstalledApps');
-      return apps.map((app) => Map<String, dynamic>.from(app)).toList();
+      return apps.map((app) {
+        if (app is Map) {
+          return Map<String, dynamic>.from(app);
+        } else {
+          print('Warning: App data is not a Map: $app');
+          return <String, dynamic>{'packageName': 'unknown', 'appName': 'Unknown App'};
+        }
+      }).toList();
     } catch (e) {
       print('Error getting installed apps: $e');
       return [];

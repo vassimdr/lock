@@ -26,7 +26,7 @@ class AppUsageStats with _$AppUsageStats {
   factory AppUsageStats.fromJson(Map<String, dynamic> json) =>
       _$AppUsageStatsFromJson(json);
 
-  Map<String, dynamic> toJson() => _$$AppUsageStatsImplToJson(this as _$AppUsageStatsImpl);
+  Map<String, dynamic> toJson() => _$AppUsageStatsToJson(this);
 
   // Firestore conversion methods
   factory AppUsageStats.fromFirestore(DocumentSnapshot doc) {

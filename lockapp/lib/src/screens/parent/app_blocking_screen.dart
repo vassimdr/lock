@@ -71,9 +71,11 @@ class _AppBlockingScreenState extends State<AppBlockingScreen>
       });
     } catch (e) {
       print('Error loading data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Veri yükleme hatası: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Veri yükleme hatası: $e')),
+        );
+      }
     }
   }
 
@@ -83,9 +85,11 @@ class _AppBlockingScreenState extends State<AppBlockingScreen>
       // Check permission again after request
       _checkPermissionAndLoadData();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('İzin isteme hatası: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('İzin isteme hatası: $e')),
+        );
+      }
     }
   }
 
@@ -130,16 +134,20 @@ class _AppBlockingScreenState extends State<AppBlockingScreen>
 
       await _loadData();
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(isBlocked ? '$appName engellendi' : '$appName engeli kaldırıldı'),
-          backgroundColor: isBlocked ? AppColors.error : AppColors.success,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isBlocked ? '$appName engellendi' : '$appName engeli kaldırıldı'),
+            backgroundColor: isBlocked ? AppColors.error : AppColors.success,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('İşlem hatası: $e')),
-      );
+      if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('İşlem hatası: $e')),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }

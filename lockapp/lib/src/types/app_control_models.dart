@@ -112,6 +112,14 @@ class TimeRestriction with _$TimeRestriction {
   // Firestore conversion methods
   factory TimeRestriction.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    
+    // Safely parse allowedDays with validation (only 0-6 range)
+    final rawAllowedDays = data['allowedDays'] as List<dynamic>? ?? [];
+    final validAllowedDays = rawAllowedDays
+        .whereType<int>() // Only keep integers
+        .where((day) => day >= 0 && day <= 6) // Only keep valid day range
+        .toList();
+    
     return TimeRestriction(
       id: doc.id,
       parentUserId: data['parentUserId'] ?? '',
@@ -121,7 +129,7 @@ class TimeRestriction with _$TimeRestriction {
       appIcon: data['appIcon'] ?? '',
       isEnabled: data['isEnabled'] ?? false,
       dailyTimeLimit: data['dailyTimeLimit'] ?? 0,
-      allowedDays: List<int>.from(data['allowedDays'] ?? []),
+      allowedDays: validAllowedDays,
       startTime: data['startTime'] ?? '00:00',
       endTime: data['endTime'] ?? '23:59',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
@@ -176,9 +184,15 @@ class TimeRestriction with _$TimeRestriction {
     }
     
     try {
-      return validDays.map((day) => dayNames[day]).join(', ');
+      // Extra safety: double-check each day before accessing dayNames
+      final safeDayNames = validDays
+          .where((day) => day >= 0 && day < dayNames.length) // Extra safety check
+          .map((day) => dayNames[day])
+          .toList();
+      
+      return safeDayNames.join(', ');
     } catch (e) {
-      print('Error in allowedDaysText: $e, validDays: $validDays');
+      print('Error in allowedDaysText: $e, allowedDays: $allowedDays, validDays: $validDays');
       return 'Geçersiz günler';
     }
   }
