@@ -24,6 +24,9 @@ class _QrGenerationScreenState extends ConsumerState<QrGenerationScreen> {
   bool _isLoading = false;
   bool _isGenerating = false;
 
+  // TEST MODE - Development only
+  static const bool _testMode = true;
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +70,43 @@ class _QrGenerationScreenState extends ConsumerState<QrGenerationScreen> {
     }
   }
 
+  // TEST MODE: Create a test QR code
+  Future<void> _generateTestQrCode() async {
+    setState(() => _isGenerating = true);
+    try {
+      // Create a test pairing request with fixed ID
+      final testRequest = PairingRequest(
+        id: 'TEST_PAIRING_REQUEST_ID',
+        parentUserId: 'test_parent_user_id',
+        parentName: 'Test Parent',
+        parentDeviceId: 'test_parent_device',
+        qrCode: 'TEST_PAIRING_REQUEST_ID',
+        createdAt: DateTime.now(),
+        expiresAt: DateTime.now().add(Duration(hours: 24)),
+        isUsed: false,
+      );
+      
+      setState(() => _currentRequest = testRequest);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🧪 Test QR kod oluşturuldu'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Test QR kod oluşturulamadı: $e')),
+        );
+      }
+    } finally {
+      setState(() => _isGenerating = false);
+    }
+  }
+
   Future<void> _deleteQrCode() async {
     if (_currentRequest == null) return;
     
@@ -103,6 +143,10 @@ class _QrGenerationScreenState extends ConsumerState<QrGenerationScreen> {
         title: const Text('Çocuk Cihazı Eşleştir'),
         backgroundColor: AppColors.parentPrimary,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -294,6 +338,24 @@ class _QrGenerationScreenState extends ConsumerState<QrGenerationScreen> {
                         ),
                       ),
                     ),
+                    
+                    // TEST MODE BUTTON
+                    if (_testMode) ...[
+                      SizedBox(height: AppSpacing.md),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isGenerating ? null : _generateTestQrCode,
+                          icon: const Icon(Icons.science),
+                          label: const Text('🧪 TEST: QR Kod Oluştur'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                   
                   SizedBox(height: AppSpacing.xl),

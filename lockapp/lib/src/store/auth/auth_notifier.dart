@@ -15,7 +15,8 @@ class AuthNotifier extends _$AuthNotifier {
   @override
   AuthState build() {
     _authService = ref.watch(authServiceProvider);
-    _initializeAuth();
+    // Initialize auth in the background, but return initial state immediately
+    Future.microtask(() => _initializeAuth());
     return const AuthState();
   }
 

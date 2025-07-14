@@ -46,11 +46,11 @@ class QrPairingService {
   }
 
   /// Scan QR code and create child account
-  Future<UserModel> acceptPairingRequest({
-    required String qrCode,
-    required String childName,
-    required String childDeviceId,
-  }) async {
+  Future<UserModel?> acceptPairingRequest(String qrCode, String childName) async {
+    // TEST MODE: Handle test QR code
+    if (qrCode == 'TEST_PAIRING_REQUEST_ID') {
+      return _handleTestPairingRequest(childName);
+    }
     // Find pairing request by QR code
     final querySnapshot = await _firestore
         .collection('pairing_requests')
@@ -67,67 +67,72 @@ class QrPairingService {
     final pairingDoc = querySnapshot.docs.first;
     final pairingRequest = PairingRequest.fromFirestore(pairingDoc);
 
-    // Create child user account (no email/password required)
-    final childUser = UserModel(
-      id: _generateUserId(),
-      email: '', // No email for child accounts
-      name: childName,
-      role: UserRole.child,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      isActive: true,
-      parentUserId: pairingRequest.parentUserId,
-    );
+    try {
+      // Create child user account (no email/password required)
+      final childUser = UserModel(
+        id: _generateUserId(),
+        email: '', // No email for child accounts
+        name: childName,
+        role: UserRole.child,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        isActive: true,
+        parentUserId: pairingRequest.parentUserId,
+      );
 
-    // Save child user to Firestore
-    await _firestore
-        .collection('users')
-        .doc(childUser.id)
-        .set(childUser.toJson());
+      // Save child user to Firestore
+      await _firestore
+          .collection('users')
+          .doc(childUser.id)
+          .set(childUser.toJson());
 
-    // Create child device
-    final childDevice = DeviceModel(
-      id: _generateDeviceId(),
-      userId: childUser.id,
-      deviceName: 'Child Device',
-      deviceId: childDeviceId,
-      deviceType: DeviceType.childDevice,
-      status: DeviceStatus.active,
-      lastSeen: DateTime.now(),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+      // Create child device
+      final childDevice = DeviceModel(
+        id: _generateDeviceId(),
+        userId: childUser.id,
+        deviceName: 'Child Device',
+        deviceId: 'child_device_${DateTime.now().millisecondsSinceEpoch}',
+        deviceType: DeviceType.childDevice,
+        status: DeviceStatus.active,
+        lastSeen: DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
 
-    // Save child device to Firestore
-    await _firestore
-        .collection('devices')
-        .doc(childDevice.id)
-        .set(childDevice.toJson());
+      // Save child device to Firestore
+      await _firestore
+          .collection('devices')
+          .doc(childDevice.id)
+          .set(childDevice.toJson());
 
-    // Update pairing request as used
-    await _firestore
-        .collection('pairing_requests')
-        .doc(pairingRequest.id)
-        .update({
-      'isUsed': true,
-      'childUserId': childUser.id,
-      'childDeviceId': childDevice.id,
-      'childName': childName,
-      'acceptedAt': Timestamp.now(),
-    });
+      // Update pairing request as used
+      await _firestore
+          .collection('pairing_requests')
+          .doc(pairingRequest.id)
+          .update({
+        'isUsed': true,
+        'childUserId': childUser.id,
+        'childDeviceId': childDevice.id,
+        'childName': childName,
+        'acceptedAt': Timestamp.now(),
+      });
 
-    // Create device pairing (implement this manually for now)
-    await _firestore.collection('device_pairings').add({
-      'parent_device_id': pairingRequest.parentDeviceId,
-      'child_device_id': childDevice.id,
-      'parent_user_id': pairingRequest.parentUserId,
-      'child_user_id': childUser.id,
-      'status': 'accepted',
-      'created_at': Timestamp.now(),
-      'updated_at': Timestamp.now(),
-    });
+      // Create device pairing (implement this manually for now)
+      await _firestore.collection('device_pairings').add({
+        'parent_device_id': pairingRequest.parentDeviceId,
+        'child_device_id': childDevice.id,
+        'parent_user_id': pairingRequest.parentUserId,
+        'child_user_id': childUser.id,
+        'status': 'accepted',
+        'created_at': Timestamp.now(),
+        'updated_at': Timestamp.now(),
+      });
 
-    return childUser;
+      return childUser;
+    } catch (e) {
+      print('Error in acceptPairingRequest: $e');
+      return null;
+    }
   }
 
   /// Get active pairing requests for current user
@@ -187,5 +192,30 @@ class QrPairingService {
       batch.delete(doc.reference);
     }
     await batch.commit();
+  }
+
+  /// TEST MODE: Handle test pairing request
+  Future<UserModel?> _handleTestPairingRequest(String childName) async {
+    try {
+      // Create a test child user
+      final childUser = UserModel(
+        id: 'test_child_${DateTime.now().millisecondsSinceEpoch}',
+        email: '',
+        name: childName,
+        role: UserRole.child,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        isActive: true,
+        parentUserId: 'test_parent_user_id',
+      );
+
+      // In test mode, we don't actually save to Firestore
+      // Just return the user model for navigation
+      print('🧪 TEST MODE: Child user created: ${childUser.name}');
+      return childUser;
+    } catch (e) {
+      print('🧪 TEST MODE ERROR: $e');
+      return null;
+    }
   }
 } 

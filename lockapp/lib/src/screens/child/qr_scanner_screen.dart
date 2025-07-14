@@ -27,6 +27,10 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   bool _showManualEntry = false;
   String? _scannedCode;
 
+  // TEST MODE - Development only
+  static const bool _testMode = true;
+  static const String _testPairingCode = "TEST_PAIRING_REQUEST_ID";
+
   @override
   void dispose() {
     _controller.dispose();
@@ -51,37 +55,34 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
         return;
       }
 
-      // Accept pairing request
-      final childUser = await _qrService.acceptPairingRequest(
-        qrCode: code,
-        childName: childName,
-        childDeviceId: 'child_device_${DateTime.now().millisecondsSinceEpoch}',
-      );
-
-      if (mounted) {
-        // Show success and navigate to child dashboard
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Eşleştirme başarılı! Hoş geldin ${childUser.name}'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        
-        // Navigate to child dashboard
-        AppRouter.goToChildDashboard();
+      // Process the pairing request
+      final result = await _qrService.acceptPairingRequest(code, childName);
+      
+      if (result != null) {
+        // Success - navigate to child dashboard
+        if (mounted) {
+          AppRouter.goToChildDashboard();
+        }
+      } else {
+        // Failed
+        if (mounted) {
+          _showErrorDialog('QR kod geçersiz veya süresi dolmuş');
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Eşleştirme hatası: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        _showErrorDialog('Bağlantı hatası: ${e.toString()}');
       }
     } finally {
-      setState(() => _isProcessing = false);
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
+  }
+
+  // TEST MODE: Simulate QR scanning
+  Future<void> _simulateQrScan() async {
+    await _processQrCode(_testPairingCode);
   }
 
   Future<String?> _showNameInputDialog() async {
@@ -152,6 +153,10 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
         title: const Text('QR Kod Tarat'),
         backgroundColor: AppColors.childPrimary,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconButton(
             icon: Icon(_showManualEntry ? Icons.qr_code_scanner : Icons.keyboard),
@@ -349,6 +354,26 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                   ),
                 ),
               ),
+              
+              // TEST MODE BUTTON
+              if (_testMode)
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                  child: ElevatedButton(
+                    onPressed: _simulateQrScan,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(
+                      '🧪 TEST: QR Tarama Simülasyonu',
+                      style: AppTextStyles.labelLarge,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -383,6 +408,22 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Hata'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Tamam'),
+          ),
+        ],
+      ),
     );
   }
 } 
