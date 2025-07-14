@@ -26,7 +26,20 @@ class AppUsageStats with _$AppUsageStats {
   factory AppUsageStats.fromJson(Map<String, dynamic> json) =>
       _$AppUsageStatsFromJson(json);
 
-  Map<String, dynamic> toJson() => _$AppUsageStatsToJson(this);
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'childUserId': childUserId,
+    'packageName': packageName,
+    'appName': appName,
+    'appIcon': appIcon,
+    'date': date.toIso8601String(),
+    'totalTimeInForeground': totalTimeInForeground,
+    'launchCount': launchCount,
+    'firstTimeStamp': firstTimeStamp.toIso8601String(),
+    'lastTimeStamp': lastTimeStamp.toIso8601String(),
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   // Firestore conversion methods
   factory AppUsageStats.fromFirestore(DocumentSnapshot doc) {
@@ -106,7 +119,19 @@ class DailyUsageSummary with _$DailyUsageSummary {
   factory DailyUsageSummary.fromJson(Map<String, dynamic> json) =>
       _$DailyUsageSummaryFromJson(json);
 
-  Map<String, dynamic> toJson() => _$$DailyUsageSummaryImplToJson(this as _$DailyUsageSummaryImpl);
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'childUserId': childUserId,
+    'date': date.toIso8601String(),
+    'totalScreenTime': totalScreenTime,
+    'totalAppLaunches': totalAppLaunches,
+    'uniqueAppsUsed': uniqueAppsUsed,
+    'mostUsedApp': mostUsedApp,
+    'mostUsedAppTime': mostUsedAppTime,
+    'topApps': topApps.map((e) => e.toJson()).toList(),
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   // Firestore conversion methods
   factory DailyUsageSummary.fromFirestore(DocumentSnapshot doc) {
@@ -179,7 +204,20 @@ class WeeklyUsageReport with _$WeeklyUsageReport {
   factory WeeklyUsageReport.fromJson(Map<String, dynamic> json) =>
       _$WeeklyUsageReportFromJson(json);
 
-  Map<String, dynamic> toJson() => _$$WeeklyUsageReportImplToJson(this as _$WeeklyUsageReportImpl);
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'childUserId': childUserId,
+    'weekStart': weekStart.toIso8601String(),
+    'weekEnd': weekEnd.toIso8601String(),
+    'totalScreenTime': totalScreenTime,
+    'averageDailyScreenTime': averageDailyScreenTime,
+    'totalAppLaunches': totalAppLaunches,
+    'averageDailyLaunches': averageDailyLaunches,
+    'dailySummaries': dailySummaries.map((e) => e.toJson()).toList(),
+    'topAppsWeekly': topAppsWeekly.map((e) => e.toJson()).toList(),
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   // Firestore conversion methods
   factory WeeklyUsageReport.fromFirestore(DocumentSnapshot doc) {

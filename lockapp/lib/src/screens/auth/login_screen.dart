@@ -110,138 +110,136 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                // App Logo
-                Container(
-                  width: 100.w,
-                  height: 100.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.security,
-                    size: 50.w,
-                    color: AppColors.primary,
-                  ),
-                ),
-                
-                SizedBox(height: AppSpacing.xl),
-                
-                // Welcome Text
-                Text(
-                  'Tekrar Hoş Geldiniz!',
-                  style: AppTextStyles.headline3,
-                  textAlign: TextAlign.center,
-                ),
-                
-                SizedBox(height: AppSpacing.md),
-                
-                Text(
-                  'Hesabınıza giriş yapın',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                SizedBox(height: AppSpacing.xl),
-                
-                // Email Field
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  enabled: !authState.isLoading,
-                  decoration: const InputDecoration(
-                    labelText: 'E-posta',
-                    hintText: 'ornek@email.com',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'E-posta adresi gerekli';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(value)) {
-                      return 'Geçerli bir e-posta adresi girin';
-                    }
-                    return null;
-                  },
-                ),
-                
-                SizedBox(height: AppSpacing.md),
-                
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: !_isPasswordVisible,
-                  enabled: !authState.isLoading,
-                  decoration: InputDecoration(
-                    labelText: 'Şifre',
-                    hintText: 'Şifrenizi girin',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
+                  // App Logo
+                  Container(
+                    width: 100.w,
+                    height: 100.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.security,
+                      size: 50.w,
+                      color: AppColors.primary,
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Şifre gerekli';
-                    }
-                    if (value.length < 6) {
-                      return 'Şifre en az 6 karakter olmalı';
-                    }
-                    return null;
-                  },
-                ),
-                
-                SizedBox(height: AppSpacing.xl),
-                
-                // Login Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: authState.isLoading ? null : _handleLogin,
-                    child: authState.isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.white,
-                              ),
-                            ),
-                          )
-                        : const Text('Giriş Yap'),
+                  
+                  SizedBox(height: AppSpacing.xl),
+                  
+                  Text(
+                    'Hoş Geldiniz',
+                    style: AppTextStyles.headlineLarge.copyWith(
+                      color: AppColors.primary,
+                    ),
                   ),
-                ),
-                
-                SizedBox(height: AppSpacing.md),
-                
-                // Register Link
-                TextButton(
-                  onPressed: authState.isLoading ? null : () => AppRouter.goToRegister(role: widget.role),
-                  child: const Text('Hesabınız yok mu? Kayıt olun'),
-                ),
-                
-                SizedBox(height: AppSpacing.md),
-                
-                // Forgot Password Link
-                TextButton(
-                  onPressed: authState.isLoading ? null : () => _showForgotPasswordDialog(),
-                  child: const Text('Şifremi unuttum'),
-                ),
-              ],
-                ),
+                  
+                  SizedBox(height: AppSpacing.sm),
+                  
+                  Text(
+                    '${widget.role == 'parent' ? 'Ebeveyn' : 'Çocuk'} hesabınızla giriş yapın',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  SizedBox(height: AppSpacing.xxl),
+                  
+                  // Email Field
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'E-posta',
+                      hintText: 'ornek@email.com',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.sm),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'E-posta gerekli';
+                      }
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        return 'Geçerli bir e-posta adresi girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  
+                  SizedBox(height: AppSpacing.lg),
+                  
+                  // Password Field
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _isPasswordVisible,
+                    decoration: InputDecoration(
+                      labelText: 'Şifre',
+                      hintText: 'Şifrenizi girin',
+                      prefixIcon: const Icon(Icons.lock_outlined),
+                      suffixIcon: IconButton(
+                        icon: Icon(_isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.sm),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Şifre gerekli';
+                      }
+                      if (value.length < 6) {
+                        return 'Şifre en az 6 karakter olmalı';
+                      }
+                      return null;
+                    },
+                  ),
+                  
+                  SizedBox(height: AppSpacing.xl),
+                  
+                  // Login Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: authState.isLoading ? null : _handleLogin,
+                      child: authState.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Giriş Yap'),
+                    ),
+                  ),
+                  
+                  SizedBox(height: AppSpacing.md),
+                  
+                  // Register Link
+                  TextButton(
+                    onPressed: authState.isLoading ? null : () => AppRouter.goToRegister(role: widget.role),
+                    child: const Text('Hesabınız yok mu? Kayıt olun'),
+                  ),
+                  
+                  SizedBox(height: AppSpacing.md),
+                  
+                  // Forgot Password Link
+                  TextButton(
+                    onPressed: authState.isLoading ? null : () => _showForgotPasswordDialog(),
+                    child: const Text('Şifremi unuttum'),
+                  ),
+                ],
               ),
             ),
           ),
@@ -307,4 +305,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
-} 
+}

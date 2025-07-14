@@ -62,8 +62,16 @@ class AppBlockingService {
     try {
       final List<dynamic> apps = await _channel.invokeMethod('getInstalledApps');
       return apps.map((app) {
-        if (app is Map) {
-          return Map<String, dynamic>.from(app);
+        if (app is Map<String, dynamic>) {
+          return app;
+        } else if (app is Map) {
+          // Safe conversion with validation
+          try {
+            return Map<String, dynamic>.from(app);
+          } catch (e) {
+            print('Warning: Failed to convert app data to Map<String, dynamic>: $app, error: $e');
+            return <String, dynamic>{'packageName': 'unknown', 'appName': 'Unknown App'};
+          }
         } else {
           print('Warning: App data is not a Map: $app');
           return <String, dynamic>{'packageName': 'unknown', 'appName': 'Unknown App'};

@@ -167,33 +167,54 @@ class TimeRestriction with _$TimeRestriction {
   }
   
   String get allowedDaysText {
-    const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-    
-    // Filter out invalid day values and ensure they're in 0-6 range
-    final validDays = allowedDays
-        .where((day) => day >= 0 && day <= 6)
-        .toList();
-    
-    if (validDays.isEmpty) return 'Hiçbir gün';
-    if (validDays.length == 7) return 'Her gün';
-    if (validDays.length == 5 && !validDays.contains(0) && !validDays.contains(6)) {
-      return 'Hafta içi';
-    }
-    if (validDays.length == 2 && validDays.contains(0) && validDays.contains(6)) {
-      return 'Hafta sonu';
-    }
-    
     try {
-      // Extra safety: double-check each day before accessing dayNames
-      final safeDayNames = validDays
-          .where((day) => day >= 0 && day < dayNames.length) // Extra safety check
-          .map((day) => dayNames[day])
-          .toList();
+      // Super defensive implementation
+      if (allowedDays == null || allowedDays.isEmpty) {
+        return 'Hiçbir gün';
+      }
       
-      return safeDayNames.join(', ');
+      const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+      final validDayNames = <String>[];
+      
+      // Process each day individually with maximum safety
+      for (var i = 0; i < allowedDays.length; i++) {
+        try {
+          final day = allowedDays[i];
+          if (day != null && day is int && day >= 0 && day < dayNames.length) {
+            final dayName = dayNames[day];
+            if (!validDayNames.contains(dayName)) {
+              validDayNames.add(dayName);
+            }
+          }
+        } catch (e) {
+          // Skip invalid day, continue with next
+          print('Skipping invalid day at index $i: ${allowedDays[i]}');
+          continue;
+        }
+      }
+      
+      if (validDayNames.isEmpty) return 'Hiçbir gün';
+      if (validDayNames.length == 7) return 'Her gün';
+      
+      // Check for weekdays (Monday-Friday)
+      final weekdays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
+      if (validDayNames.length == 5 && 
+          weekdays.every((day) => validDayNames.contains(day))) {
+        return 'Hafta içi';
+      }
+      
+      // Check for weekend (Saturday-Sunday)
+      if (validDayNames.length == 2 && 
+          validDayNames.contains('Cumartesi') && 
+          validDayNames.contains('Pazar')) {
+        return 'Hafta sonu';
+      }
+      
+      return validDayNames.join(', ');
+      
     } catch (e) {
-      print('Error in allowedDaysText: $e, allowedDays: $allowedDays, validDays: $validDays');
-      return 'Geçersiz günler';
+      print('Critical error in allowedDaysText: $e');
+      return 'Geçersiz gün verileri';
     }
   }
   
